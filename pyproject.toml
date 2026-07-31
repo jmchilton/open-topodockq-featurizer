@@ -11,6 +11,10 @@ dependencies = [
     "petls-pytorch",
 ]
 
+[tool.uv.sources]
+# Use the in-foundry v2 fork (isolated-vertex fix) rather than the buggy PyPI release.
+petls-pytorch = { path = "../petls-pytorch", editable = true }
+
 [build-system]
 requires = ["hatchling"]
 build-backend = "hatchling.build"

@@ -40,6 +40,12 @@ it. It emits the raw 2,754 npy that upstream `03` reorders into named columns an
   training split). Not our concern to reproduce — but requires Zenodo `singlePPD_full_bins_features.csv`.
 - **No scaler is serialized** — `04` fits `StandardScaler` live from the training CSV.
 
+## Status
+
+Featurizer **reproduced bit-exact** — the full 2,754 vector matches the committed `4k38` oracle across
+all 9 channels (max abs diff ~2e-12, float noise), via `featurize_interface(interface_pdb)`. See
+`tests/test_parity.py`. Remaining: end-to-end scorer parity across the full Zenodo set (below).
+
 ## Validation plan
 
 1. **Local (no Zenodo):** bit-exact vs the committed `4k38` raw 2,754 npy — full assembled vector, correct

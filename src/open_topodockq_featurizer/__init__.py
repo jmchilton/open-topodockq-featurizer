@@ -8,4 +8,12 @@ CHANNELS = ("CC", "CN", "CO", "NC", "NN", "NO", "OC", "ON", "OO")
 PER_CHANNEL_WIDTH = 306
 RAW_WIDTH = 2754
 
-__all__ = ["CHANNELS", "PER_CHANNEL_WIDTH", "RAW_WIDTH"]
+from .featurize import featurize_interface, featurize_channel  # noqa: E402
+
+__all__ = [
+    "CHANNELS",
+    "PER_CHANNEL_WIDTH",
+    "RAW_WIDTH",
+    "featurize_interface",
+    "featurize_channel",
+]
