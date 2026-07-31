@@ -14,6 +14,11 @@ from __future__ import annotations
 import numpy as np
 import gudhi
 import torch
+
+# float64 is required: float32 puts harmonic eigenvalues at ~1e-4 and corrupts the L0 nullity
+# (Betti-0). `_config` is a private surface of the pinned petls-pytorch v2 fork — the dtype must be
+# set before `Complex` is imported, hence the deferred import below (and the E402s). If a fork bump
+# moves `_config`, this is the line to update.
 from petls_pytorch import _config
 
 _config.set_dtype(torch.float64)

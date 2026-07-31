@@ -5,10 +5,13 @@ scorer's ``03_extract_features_from_npy_to_csv.py``. See README for layout, cons
 """
 
 CHANNELS = ("CC", "CN", "CO", "NC", "NN", "NO", "OC", "ON", "OO")
-PER_CHANNEL_WIDTH = 306
-RAW_WIDTH = 2754
 
-from .featurize import featurize_interface, featurize_channel  # noqa: E402
+from .featurize import (  # noqa: E402
+    PER_CHANNEL_WIDTH,
+    RAW_WIDTH,
+    featurize_channel,
+    featurize_interface,
+)
 
 __all__ = [
     "CHANNELS",

@@ -22,4 +22,6 @@ def test_4k38_full_vector_bit_exact():
     assert ours.shape == (RAW_WIDTH,)
     assert oracle.shape == (RAW_WIDTH,)
     maxdiff = np.abs(ours - oracle).max()
-    assert maxdiff < 1e-6, f"max abs diff {maxdiff}"
+    # actual residual is ~2e-12 (float noise); a tight bound catches an eigenvalue-threshold
+    # swap (which would perturb a Betti-0 count / nz.min by ~1e-8), not just gross regressions.
+    assert maxdiff < 1e-9, f"max abs diff {maxdiff}"
