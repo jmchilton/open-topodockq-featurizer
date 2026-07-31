@@ -42,24 +42,29 @@ it. It emits the raw 2,754 npy that upstream `03` reorders into named columns an
 
 ## Status
 
-Featurizer **reproduced bit-exact** — the full 2,754 vector matches the oracle across all 9 channels
-(max abs diff ~1e-12, float noise), via `featurize_interface(interface_pdb)`, on **two** independent
-structures: the committed `4k38` scorer-repo vector and a minted full-config `2fns` oracle
-(`tests/fixtures/`, see its README). See `tests/test_parity.py`.
+Featurizer **reproduced bit-exact** and validated **at scale**. `featurize_interface(interface_pdb)`
+matches the upstream-shipped features on **400 real interface structures spanning 400 distinct PDB
+entries** (Zenodo `singlePPD_interface_files.tar.gz` → our raw 2,754 → upstream `03` reorder → diff vs
+`singlePPD_full_bins_features.csv`): **max abs diff 1.85e-11, median 1.4e-12, 0 errors, 0 over
+tolerance**. Plus two curated fixtures in-repo (`4k38`, minted `2fns`). See `tests/test_parity.py` and
+`validation/at_scale_parity.py`.
 
-Still untested (both fixtures are ATOM-only, chain A/B, all elements populated on both sides): channels
-with an empty/near-empty side (alpha zeros-guard), the persistence-floor-empties path, and PDB parsing
-of HETATM / blank-element / non-A-B-chain inputs. Plus the end-to-end scorer parity across the full
-Zenodo set (below).
+Still **unexercised** (not by fixtures nor by the 400 — the whole singlePPD corpus is uniformly clean
+ATOM-only, chain A/B, both sides well-populated, ≥17 peptide atoms, no HETATM): channels with an
+empty/near-empty side (alpha zeros-guard), the persistence-floor-empties path, and parsing of HETATM /
+blank-element / non-A-B-chain inputs. The real data simply contains no such cases — closing these
+requires **synthetic probes** against the upstream `.pyc`, not more corpus.
 
 ## Validation plan
 
 1. **Local (no Zenodo):** bit-exact vs the committed `4k38` raw 2,754 npy — full assembled vector, correct
    channel order into upstream `03`. (The committed `2fns` npy is 954-wide reduced-config — not a full oracle.)
 2. **End-to-end (acceptance gate):** our features → unchanged upstream `03→04` (+ Zenodo record 15469415
-   training CSV, DockQ CSV, weights) → predicted p-DockQ matches the scorer on `example_features.csv`, then
-   across the full Zenodo `processed_data` set. Closes the two residual risks: alpha_topo generalization
-   beyond 2 PDBs, and column identity/order alignment.
+   training CSV, DockQ CSV, weights) → predicted p-DockQ matches the scorer on `example_features.csv`.
+   **DONE:** 4k38 p-DockQ bit-identical; open scorer reproduces test PCC 0.8773 (n=9464). See `validation/`.
+3. **At scale (DONE):** 400 diverse interface PDBs featurized and diffed against the shipped feature rows,
+   all bit-exact — closes alpha_topo generalization and column identity/order beyond a couple of PDBs.
+   Residual: the atypical-input paths above, absent from the corpus (need synthetic probes).
 
 ## License
 

@@ -33,6 +33,22 @@ python <this>/run_scorer.py --features_csv ours03.csv
   `example_features.csv` prediction. 2fns → 0.20463052.
 - Confirmed: mask drops exactly 108 training-constant columns → input_dim 2646.
 
-Still open: featurizer validation *at scale* (regenerate features for the full test set from
-`singlePPD_interface_files.tar.gz`, ~4 GB) to exercise atypical inputs (empty-side channels, HETATM /
-blank-element parsing) against the shipped feature rows.
+## At-scale featurizer parity (`at_scale_parity.py`)
+
+Featurizes a stratified sample of real interface PDBs from `singlePPD_interface_files.tar.gz`
+(Zenodo 15469415, ~4 GB) and diffs our output — via upstream `03`'s reorder, imported unchanged — against
+the matching `singlePPD_full_bins_features.csv` rows. Compares by **column name**, so a reorder bug can't
+hide as a coincidental match.
+
+```bash
+# from the TopoDockQ clone dir (needs ./03_...py):
+python <this>/at_scale_parity.py --interface_dir <extracted_pdbs> --features_csv <shipped_subset.csv>
+```
+
+**Result (2026-07-31):** 400 structures across **400 distinct PDB entries** →
+**max abs diff 1.85e-11, median 1.4e-12, 0 errored, 0 over tol 1e-6.** Featurizer generalizes.
+
+**Boundary:** all 400 (and both fixtures) are clean ATOM-only, both sides well-populated (≥17 peptide
+atoms, no HETATM). So empty-side alpha, persistence-floor-empties, and HETATM/blank-element/non-A-B
+parsing remain **unexercised by real data** — the singlePPD corpus contains no such cases. Closing them
+needs synthetic probes against the upstream `.pyc`, not a larger corpus run.
