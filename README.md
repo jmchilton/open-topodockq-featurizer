@@ -42,9 +42,15 @@ it. It emits the raw 2,754 npy that upstream `03` reorders into named columns an
 
 ## Status
 
-Featurizer **reproduced bit-exact** — the full 2,754 vector matches the committed `4k38` oracle across
-all 9 channels (max abs diff ~2e-12, float noise), via `featurize_interface(interface_pdb)`. See
-`tests/test_parity.py`. Remaining: end-to-end scorer parity across the full Zenodo set (below).
+Featurizer **reproduced bit-exact** — the full 2,754 vector matches the oracle across all 9 channels
+(max abs diff ~1e-12, float noise), via `featurize_interface(interface_pdb)`, on **two** independent
+structures: the committed `4k38` scorer-repo vector and a minted full-config `2fns` oracle
+(`tests/fixtures/`, see its README). See `tests/test_parity.py`.
+
+Still untested (both fixtures are ATOM-only, chain A/B, all elements populated on both sides): channels
+with an empty/near-empty side (alpha zeros-guard), the persistence-floor-empties path, and PDB parsing
+of HETATM / blank-element / non-A-B-chain inputs. Plus the end-to-end scorer parity across the full
+Zenodo set (below).
 
 ## Validation plan
 
