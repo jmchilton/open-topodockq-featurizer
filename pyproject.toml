@@ -6,7 +6,7 @@ requires-python = ">=3.11"
 dependencies = [
     "numpy",
     "gudhi",
-    "biopython",
+    "torch",  # imported directly in featurize.py (petls dtype config); not just transitive
     # petls-pytorch fork v2 (isolated-vertex fix) — installed from the local clone / foundry env
     "petls-pytorch",
 ]
