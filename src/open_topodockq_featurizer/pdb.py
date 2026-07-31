@@ -18,12 +18,16 @@ def load_interface(path, protein_chain=PROTEIN_CHAIN, peptide_chain=PEPTIDE_CHAI
     """Return ``{element: {"protein": (n,3), "peptide": (m,3)}}`` of float64 coordinates.
 
     Parsed from fixed-column PDB records; element read from columns 77-78.
+
+    Only ``ATOM`` records are read: the upstream ``.pyc`` ignores ``HETATM`` (verified by a synthetic
+    all-``HETATM`` peptide probe returning an all-zero feature vector). Real interface files are
+    ATOM-only, so this only matters for atypical inputs.
     """
     protein = {e: [] for e in ELEMENTS}
     peptide = {e: [] for e in ELEMENTS}
     with open(path) as fh:
         for line in fh:
-            if not (line.startswith("ATOM") or line.startswith("HETATM")):
+            if not line.startswith("ATOM"):
                 continue
             element = line[76:78].strip().upper()
             if element not in ELEMENTS:

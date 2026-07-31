@@ -31,7 +31,11 @@ from .pdb import ELEMENTS, load_interface
 PAD = 100.0                                          # intra-chain distance padding (any value > MAX_EDGE)
 MAX_EDGE = 7.0                                       # Rips cap for betti/barcode-A blocks
 FILTRATIONS = np.round(np.arange(2.0, 10.25, 0.25), 2)   # 33 spectra filtration points
-BETTI_EDGES = np.round(np.arange(1.75, 10.25, 0.25), 2)  # 34 edges -> 33 death-bin intervals
+# 34 edges -> 33 death-bin intervals. First edge is 0.0 (the upstream `--bins` arg is
+# `[0, 2.0, 2.25, ..., 10.0]`): bin 0 = [0, 2.0). Real interface distances never fall below ~2.3A
+# so this is indistinguishable from a 1.75 first edge on real data, but a synthetic probe with
+# sub-2.0 cross distances proved the true edge is 0.0.
+BETTI_EDGES = np.round(np.concatenate([[0.0], np.arange(2.0, 10.25, 0.25)]), 2)
 ALPHA_CUT = 7.0                                      # diameter clip for alpha_topo
 ALPHA_FLOOR = 0.1                                    # persistence floor for alpha_topo
 EIG_TOL = 1e-9                                       # zero-eigenvalue threshold
@@ -105,7 +109,7 @@ def alpha_topo(points, degree):
     st.compute_persistence()
     iv = st.persistence_intervals_in_dimension(degree)
     iv = iv[np.isfinite(iv[:, 1])] if iv.size else iv
-    if len(iv) < 2:
+    if iv.size == 0:
         return np.zeros(18)
     b = np.clip(2.0 * np.sqrt(iv[:, 0]), None, ALPHA_CUT)   # 2*sqrt(alpha) = diameter, clipped
     d = np.clip(2.0 * np.sqrt(iv[:, 1]), None, ALPHA_CUT)
@@ -125,7 +129,14 @@ def alpha_topo(points, degree):
 
 
 def featurize_channel(protein_pts, peptide_pts):
-    """One 306-value channel block for a (protein-element, peptide-element) pairing."""
+    """One 306-value channel block for a (protein-element, peptide-element) pairing.
+
+    A channel with an empty side (no atoms of that element on protein or peptide) emits an all-zero
+    block: the upstream ``.pyc`` short-circuits the whole channel (betti/barcode/spectra/alpha) to
+    zero, verified by a synthetic probe. A single-atom (non-empty) side is *not* zeroed.
+    """
+    if len(protein_pts) == 0 or len(peptide_pts) == 0:
+        return np.zeros(PER_CHANNEL_WIDTH)
     dm = _bipartite_distance_matrix(protein_pts, peptide_pts)
     pooled = np.vstack([protein_pts, peptide_pts]) if len(protein_pts) or len(peptide_pts) \
         else np.empty((0, 3))

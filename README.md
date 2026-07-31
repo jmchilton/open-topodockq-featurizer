@@ -49,11 +49,17 @@ entries** (Zenodo `singlePPD_interface_files.tar.gz` → our raw 2,754 → upstr
 tolerance**. Plus two curated fixtures in-repo (`4k38`, minted `2fns`). See `tests/test_parity.py` and
 `validation/at_scale_parity.py`.
 
-Still **unexercised** (not by fixtures nor by the 400 — the whole singlePPD corpus is uniformly clean
-ATOM-only, chain A/B, both sides well-populated, ≥17 peptide atoms, no HETATM): channels with an
-empty/near-empty side (alpha zeros-guard), the persistence-floor-empties path, and parsing of HETATM /
-blank-element / non-A-B-chain inputs. The real data simply contains no such cases — closing these
-requires **synthetic probes** against the upstream `.pyc`, not more corpus.
+The atypical-input paths the real corpus never reaches (the whole singlePPD set is uniformly clean
+ATOM-only, both sides ≥17 atoms, no HETATM) are covered by **six synthetic probes** — empty-side
+channels, single-atom side, HETATM, blank-element, extra non-A/B chain + H/S — each bit-exact against
+a `.pyc`-minted oracle (`tests/test_probes.py`, `tests/fixtures/probes/`). Building them surfaced and
+fixed **four bugs invisible to real-data parity**: betti first bin edge is `0.0` not `1.75`; `HETATM`
+must be ignored; an empty-side channel emits a zero block (was raising); single-interval alpha must be
+computed, not zeroed. All four are dormant on real data (the 400-structure parity is byte-identical
+before and after), which is exactly why only probes could catch them.
+
+Remaining assumption: `EIG_TOL = 1e-9` (the zero-eigenvalue threshold) is not independently pinned —
+no probe forces an eigenvalue near it. Real data is insensitive to it at any sane value.
 
 ## Validation plan
 
